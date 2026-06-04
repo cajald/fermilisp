@@ -1,0 +1,8 @@
+fermilisp -- a portable lisp interpreter
+========================================
+
+FermiLisp is a FREE Public Domain Lisp interpreter made mainly for FermiOS, but portable on basically
+any system.
+
+It is written in C99 and supports most stuff you'd expect from a basic LISP system.
+
