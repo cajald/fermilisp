@@ -8,6 +8,8 @@
  * 	- dotted lists (custom termination)
  */
 
+#include <stdlib.h>
+
 #include "cons.h"
 #include "util.h"
 
@@ -31,7 +33,7 @@ Value*
 mksym(const char* s)
 {
 	Value* v = emalloc(sizeof(*v));
-	v->type = VAL_CONS;
+	v->type = VAL_SYM;
 	v->v.sym = s; /* do not copy, just reown */
 	return v;
 }
