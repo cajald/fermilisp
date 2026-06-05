@@ -32,7 +32,7 @@ clean:
 
 install: all
 	install -D ${PREFIX}${BINDIR}
-	install -sm ${TARG} ${PREFIX}${BINDIR}${BINNAME}
+	install -sm 755 ${TARG} ${PREFIX}${BINDIR}${BINNAME}
 
 uninstall:
 	rm -f ${PREFIX}${BINDIR}${BINNAME}
