@@ -12,6 +12,15 @@
 
 char* argv0;
 
+int   strict = 0;
+char* script = "";
+
+static void
+usage(void)
+{
+	printf("%s: usage: %s [-v] [-s] [-h] <SCRIPT>\n", argv0, argv0);
+}
+
 int
 main(int argc, char** argv)
 {
@@ -19,17 +28,23 @@ main(int argc, char** argv)
 		case 'v':
 			printf("fermiLisp version %s\n", VERSION);
 			return EXIT_SUCCESS;
+		case 's':
+			strict = 1;
+			break;
 		case 'h':
-			printf("%s: usage: %s [-v] [-h] [SCRIPT]\n", argv0, argv0);
+			usage();
 			return EXIT_SUCCESS;
 		default:
 			fprintf(stderr, "%s: unknown flag %c\n", argv0, ARGC());
+			usage();
 			return EXIT_FAILURE;
 	} ARGEND
-
-	if (argc < 3) {
+	
+	if (argc == 0) {
 		die("repl is todo");
 	}
+
+	script = argv[0];
 
 	return EXIT_SUCCESS;
 }
