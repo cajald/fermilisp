@@ -8,12 +8,32 @@
 #include <stdlib.h>
 
 #include "arg.h"
+#include "lexer.h"
 #include "util.h"
 
 char* argv0;
 
 int   strict = 0;
 char* script = "";
+
+static char*
+readfile(const char* path)
+{
+	FILE* f = fopen(path, "r");
+	if (!f) die("cannot open SCRIPT");
+
+	fseek(f, 0, SEEK_END);
+	long len = ftell(f);
+	rewind(f);
+
+	char* buf = emalloc(len + 1);
+	if (fread(buf, 1, len, f) != (size_t)len)
+		die("cannot read file");
+
+	buf[len] = '\0';
+	fclose(f);
+	return buf;
+}
 
 static void
 usage(void)
@@ -44,7 +64,29 @@ main(int argc, char** argv)
 		die("repl is todo");
 	}
 
-	script = argv[0];
+	script = readfile(argv[0]);
+	Lexer lex;
+	lexinit(&lex, script);
+
+	for (;;) {
+		Token t = nexttok(&lex);
+		switch (t.type) {
+			case TOK_EOF:
+				return EXIT_SUCCESS;
+			case TOK_NUM:
+				printf("%f (num)\n", t.num);
+				break;
+			case TOK_SYM:
+				printf("%.*s (sym)\n", t.len, t.start);
+				break;
+			case TOK_LPAREN:
+				puts("LPAREN");
+				break;
+			case TOK_RPAREN:
+				puts("RPAREN");
+				break;
+		}
+	}
 
 	return EXIT_SUCCESS;
 }
