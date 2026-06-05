@@ -2,7 +2,7 @@
 # Makefile -- build system
 #
 
-CFILES= main.c util.c
+CFILES= main.c util.c cons.c
 OFILES= ${CFILES:.c=.o}
 DFILES= ${CFILES:.c=.d}
 
