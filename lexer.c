@@ -20,7 +20,7 @@ skipws(Lexer* l)
 static int
 issymch(char c)
 {
-	return isalnum(c) || c == '_' || c == '-' || c == '+' || c == '*';
+	return !isspace(c) && c != '(' && c != ')';
 }
 
 /*****************************************************************************/
@@ -41,8 +41,8 @@ nexttok(Lexer* l)
 
 	switch (*l->cur) {
 		case '\0':	t.type = TOK_EOF; return t;
-		case '(':	t.type = TOK_LPAREN; return t;
-		case ')':	t.type = TOK_RPAREN; return t;
+		case '(':	l->cur++; t.type = TOK_LPAREN; return t;
+		case ')':	l->cur++; t.type = TOK_RPAREN; return t;
 	}
 
 	/* number */
