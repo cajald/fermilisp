@@ -15,6 +15,7 @@ void  die(const char* msg);
 void* emalloc(size_t size);
 void* ecalloc(size_t nmemb, size_t size);
 void* erealloc(void* ptr, size_t newsize);
+char* estrndup(const char* s, int len);
 void  efree(void* ptr);
 
 #define ASSERT(x)	do { if (!(x)) { \

@@ -9,6 +9,7 @@
 
 #include "arg.h"
 #include "lexer.h"
+#include "parser.h"
 #include "util.h"
 
 char* argv0;
@@ -68,25 +69,8 @@ main(int argc, char** argv)
 	Lexer lex;
 	lexinit(&lex, script);
 
-	for (;;) {
-		Token t = nexttok(&lex);
-		switch (t.type) {
-			case TOK_EOF:
-				return EXIT_SUCCESS;
-			case TOK_NUM:
-				printf("%f (num)\n", t.num);
-				break;
-			case TOK_SYM:
-				printf("%.*s (sym)\n", t.len, t.start);
-				break;
-			case TOK_LPAREN:
-				puts("LPAREN");
-				break;
-			case TOK_RPAREN:
-				puts("RPAREN");
-				break;
-		}
-	}
+	Value* expr = readexpr(&lex);
+	print(expr);
 
 	return EXIT_SUCCESS;
 }
