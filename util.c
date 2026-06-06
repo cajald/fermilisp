@@ -62,7 +62,7 @@ estrndup(const char* s, int len)
 	char* out = emalloc(len + 1);
 	for (int i = 0; i < len; i++)
 		out[i] = s[i];
-	out[len] = '\'';
+	out[len] = '\0';
 	return out;
 }
 
