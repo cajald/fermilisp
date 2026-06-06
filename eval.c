@@ -92,7 +92,10 @@ eval(Value* sexp)
 	if (!found)
 		die("unknown function");
 
-	evaluated_args = evallist(args);
+	if (!found->special)
+		evaluated_args = evallist(args);
+	else
+		evaluated_args = args;
 
 	return found->cb(evaluated_args);
 }

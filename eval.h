@@ -15,6 +15,7 @@ struct builtin
 {
 	Value* sym;
 	BuiltinCallback cb;
+	int special;
 };
 
 extern const struct builtin builtins[];

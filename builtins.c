@@ -16,21 +16,21 @@
  */
 const struct builtin builtins[] =
 {
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "*" },      .cb = bi_mul },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "+" },      .cb = bi_plus },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "-" },      .cb = bi_minus },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "/" },      .cb = bi_div },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "*" },      .cb = bi_mul, 0 },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "+" },      .cb = bi_plus, 0 },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "-" },      .cb = bi_minus, 0 },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "/" },      .cb = bi_div, 0 },
 
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "car" },    .cb = bi_car },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "cdr" },    .cb = bi_cdr },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "car" },    .cb = bi_car, 0 },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "cdr" },    .cb = bi_cdr, 0 },
 
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "defun" },  .cb = bi_defun },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "eval" },   .cb = eval },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "defun" },  .cb = bi_defun, 1 },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "eval" },   .cb = eval, 1 },
 
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, .cb = bi_lambda },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "mod" },    .cb = bi_mod },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, .cb = bi_lambda, 1 },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "mod" },    .cb = bi_mod, 0 },
 
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "quote" },  .cb = bi_quote },
+	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "quote" },  .cb = bi_quote, 1 },
 };
 
 const size_t builtins_count = ARRSIZE(builtins);
