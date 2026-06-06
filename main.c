@@ -11,6 +11,7 @@
 #include "eval.h"
 #include "lexer.h"
 #include "parser.h"
+#include "repl.h"
 #include "util.h"
 
 char* argv0;
@@ -65,9 +66,8 @@ main(int argc, char** argv)
 			return EXIT_FAILURE;
 	} ARGEND
 
-	if (argc == 0) {
-		die("repl is todo");
-	}
+	if (argc == 0)
+		repl();
 
 	script = readfile(argv[0]);
 

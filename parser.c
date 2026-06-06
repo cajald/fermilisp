@@ -75,7 +75,7 @@ readexpr(Lexer* l)
 		case TOK_NUM:
 		case TOK_SYM:		return readatom(t);
 		case TOK_RPAREN:	die("unexpected )");
-		case TOK_EOF:           return mknil();
+		case TOK_EOF:           return NULL;
 	}
 
 	/* At this point, the token *IS* invalid */
