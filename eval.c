@@ -63,6 +63,13 @@ eval(Value* sexp)
 	struct builtin key;
 	struct builtin* found;
 
+	if (sexp->type == VAL_NUM || sexp->type == VAL_NIL)
+		return sexp;
+	
+	/* TODO: When variables are implemented, remove this! */
+	if (sexp->type == VAL_SYM)
+		return sexp;
+
 	c = car(sexp);
 	args = cdr(sexp);
 
