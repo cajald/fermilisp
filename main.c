@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "arg.h"
+#include "eval.h"
 #include "lexer.h"
 #include "parser.h"
 #include "util.h"
@@ -49,28 +50,43 @@ main(int argc, char** argv)
 		case 'v':
 			printf("fermiLisp version %s\n", VERSION);
 			return EXIT_SUCCESS;
+
 		case 's':
 			strict = 1;
 			break;
+
 		case 'h':
 			usage();
 			return EXIT_SUCCESS;
+
 		default:
 			fprintf(stderr, "%s: unknown flag %c\n", argv0, ARGC());
 			usage();
 			return EXIT_FAILURE;
 	} ARGEND
-	
+
 	if (argc == 0) {
 		die("repl is todo");
 	}
 
 	script = readfile(argv[0]);
+
 	Lexer lex;
 	lexinit(&lex, script);
 
-	Value* expr = readexpr(&lex);
-	print(expr);
+	while (1)
+	{
+		Value* expr = readexpr(&lex);
+
+		/* EOF */
+		if (expr == NULL || expr->type == VAL_NIL)
+			break;
+
+		Value* result = eval(expr);
+
+		print(result);
+		printf("\n");
+	}
 
 	return EXIT_SUCCESS;
 }

@@ -24,28 +24,46 @@ readatom(Token t)
 	die("bad atom");
 	return NULL; /* unreachable */
 }
+/*****************************************************************************/
 
 static Value*
 readlist(Lexer* l)
 {
 	Token t = nexttok(l);
 
-	/* empty list */
 	if (t.type == TOK_RPAREN)
 		return mknil();
 
-	Value* head;
+	Value* head = NULL;
+	Value* tail = NULL;
 
-	if (t.type == TOK_LPAREN)
-		head = readlist(l); /* nested list */
-	else
-		head = readatom(t);
+	while (t.type != TOK_RPAREN)
+	{
+		Value* elem;
 
-	Value* tail = readlist(l);
-	return cons(head, tail);
+		if (t.type == TOK_LPAREN)
+			elem = readlist(l);
+		else
+			elem = readatom(t);
+
+		Value* node = cons(elem, mknil());
+
+		if (!head)
+		{
+			head = node;
+			tail = node;
+		}
+		else
+		{
+			tail->v.cons.cdr = node;
+			tail = node;
+		}
+
+		t = nexttok(l);
+	}
+
+	return head;
 }
-
-/*****************************************************************************/
 
 Value*
 readexpr(Lexer* l)
@@ -89,8 +107,9 @@ print(Value* v)
 			break;
 		case VAL_CONS:
 			printlist(v);
+			break;
 		case VAL_NIL:
-			printf("nil");
+			printf("()");
 			break;
 	}
 }

@@ -24,6 +24,6 @@ void  efree(void* ptr);
 				abort(); \
 			} } while (0)
 
-#define ARRSIZE(arr)	sizeof(arr) / arr[0];
+#define ARRSIZE(arr)	sizeof(arr) / sizeof(arr[0])
 
 #endif /* UTILS_H */
