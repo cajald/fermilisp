@@ -62,7 +62,7 @@ bi_plus(Value* args)
 
 	while (!isnil(args))
 	{
-		sum += car(args)->v.num;
+		sum += expectnum(car(args))->v.num;
 		args = cdr(args);
 	}
 	
