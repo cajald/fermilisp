@@ -2,7 +2,27 @@ fermilisp -- a portable lisp interpreter
 ========================================
 
 FermiLisp is a FREE Public Domain Lisp interpreter made mainly for FermiOS, but portable on basically
-any system.
+any operating system that supports C.
 
-It is written in C99 and supports most stuff you'd expect from a basic LISP system.
+It is written in C99 and supports most stuff you'd expect from a basic LISP system, and can be embedded on many applications.
+
+BUILDING
+========
+
+Use make. Both gmake and bmake work, but bmake is preferred. You'll only need a C compiler:
+
+	$ make
+	cc ...
+	cc ...
+	cc ...
+
+	...
+
+If everthing goes OK, a ./flisp executable will appear. Install it with:
+
+	# make install
+
+(NOTE: run as root). You can uninstall with:
+
+	# make uninstall
 
