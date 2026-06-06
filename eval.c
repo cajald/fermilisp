@@ -56,25 +56,37 @@ compare(const void* a, const void* b)
 Value*
 eval(Value* sexp)
 {
-	Value* c = car(sexp);
-	Value* args = cdr(sexp);
+	Value* c;
+	Value* args;
+	Value* evaluated_args;
+	Value tmp;
+	struct builtin key;
+	struct builtin* found;
+
+	c = car(sexp);
+	args = cdr(sexp);
 
 	if (c->type != VAL_SYM)
 		die("invalid function call");
 
-	struct builtin key;
-	key.sym = c;
-
-	const char* name = c->v.sym;
-
-	struct builtin key;
-	Value tmp;
 	tmp.type = VAL_SYM;
-	tmp.v.sym = name;
+	tmp.v.sym = c->v.sym;
 
 	key.sym = &tmp;
+	key.cb = NULL;
 
-	die("unknown function");
-	return mknil();
+	found = bsearch(
+			&key,
+			builtins,
+			builtins_count,
+			sizeof(struct builtin),
+			compare);
+
+	if (!found)
+		die("unknown function");
+
+	evaluated_args = evallist(args);
+
+	return found->cb(evaluated_args);
 }
 
