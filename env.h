@@ -30,5 +30,6 @@ Value* env_lookup(Env* env, const char* name);
 Binding* mkbind(const char* symname, Value* val, Binding* next);
 Env*     mkenv(Env* parent);
 void     defenv(Env* env, const char* name, Value* val);
+int      envset(Env* env, const char* name, Value* new);
 
 #endif /* ENV_H */

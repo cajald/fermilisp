@@ -23,6 +23,7 @@ const struct builtin builtins[] =
 	{ &(Value){ .type = VAL_SYM, .v.sym = "define" }, bi_define, 1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, bi_lambda, 1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "quote" },  bi_quote,  1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "set!" },   bi_set,    1 },
 };
 
 const size_t builtins_count = ARRSIZE(builtins);
@@ -160,5 +161,22 @@ bi_define(Env* env, Value* args)
 
 	die("malformed define");
 	return mknil();
+}
+
+Value*
+bi_set(Env* env, Value* args)
+{
+	Value* targ = car(args);
+	Value* expr = car(cdr(args));
+
+	if (targ->type != VAL_SYM)
+		die("set! requires a symbol");
+
+	Value* val = eval(env, expr);
+
+	if (!envset(env, targ->v.sym, val))
+		die("can't set!: unbound variable");
+
+	return val;
 }
 

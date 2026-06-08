@@ -49,3 +49,18 @@ defenv(Env* env, const char* name, Value* val)
 	env->bindings = mkbind(name, val, env->bindings);
 }
 
+int
+envset(Env* env, const char* name, Value* new)
+{
+	while (env) {
+		for (Binding* b = env->bindings; b; b = b->next) {
+			if (strcmp(b->symname, name) == 0) {
+				b->val = new;
+				return 1;
+			}
+		}
+		env = env->parent;
+	}
+	return 0;
+}
+
