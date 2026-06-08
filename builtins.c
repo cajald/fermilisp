@@ -8,11 +8,11 @@
 
 const struct builtin builtins[] =
 {
+	{ &(Value){ .type = VAL_SYM, .v.sym = "%" },    bi_mod,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "*" },    bi_mul,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "+" },    bi_plus,   0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "-" },    bi_minus,  0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "/" },    bi_div,    0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "%" },    bi_mod,    0 },
 
 	{ &(Value){ .type = VAL_SYM, .v.sym = "car" },  bi_car,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "cdr" },  bi_cdr,    0 },
