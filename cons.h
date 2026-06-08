@@ -10,10 +10,15 @@
 #ifndef CONS_H
 #define CONS_H
 
+#include "cons.h"
+
 #include <stdint.h>
 
-typedef struct cons     Cons;
-typedef struct val      Value;
+typedef struct cons   Cons;
+typedef struct lambda  Lambda;
+typedef struct val     Value;
+
+struct env;
 
 enum valtype
 {
@@ -21,9 +26,17 @@ enum valtype
 	VAL_CONS,
 	VAL_SYM,
 	VAL_NUM,
+	VAL_LAMBDA,
 };
 
-typedef enum   valtype  ValType;
+typedef enum valtype ValType;
+
+struct lambda
+{
+	Value* params;
+	Value* body;
+	struct env*   closure;
+};
 
 struct cons
 {
@@ -35,20 +48,21 @@ struct val
 {
 	ValType type;
 	union {
-		Cons        cons;
+		Cons    cons;
 		const char* sym;
-		double      num;
-		int         nil;
+		double  num;
+		Lambda  lambda;
 	} v;
 };
 
-/*****************************************************************************/
-
+/* constructors */
 Value* mknil(void);
 Value* mknum(double d);
 Value* mksym(const char* s);
+Value* mklambda(Value* params, Value* body, struct env* closure);
 Value* cons(Value* car, Value* cdr);
 
+/* list ops */
 Value* car(Value* v);
 Value* cdr(Value* v);
 int    isnil(Value* v);

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include "cons.h"
+#include "env.h"
 #include "util.h"
 
 Value*
@@ -34,37 +35,44 @@ mksym(const char* s)
 {
 	Value* v = emalloc(sizeof(*v));
 	v->type = VAL_SYM;
-	v->v.sym = s; /* do not copy, just reown */
+	v->v.sym = s;
 	return v;
 }
 
 Value*
-cons(Value* car, Value* cdr)
+mklambda(Value* params, Value* body, Env* closure)
 {
 	Value* v = emalloc(sizeof(*v));
-	v->type = VAL_CONS;
-	v->v.cons.car = car;
-	v->v.cons.cdr = cdr;
+	v->type = VAL_LAMBDA;
+
+	v->v.lambda.params = params;
+	v->v.lambda.body = body;
+	v->v.lambda.closure = closure;
+
 	return v;
 }
 
-/*****************************************************************************/
+Value*
+cons(Value* carv, Value* cdrv)
+{
+	Value* v = emalloc(sizeof(*v));
+	v->type = VAL_CONS;
+	v->v.cons.car = carv;
+	v->v.cons.cdr = cdrv;
+	return v;
+}
 
 Value*
 car(Value* v)
 {
-	if (v->type != VAL_CONS)
-		die("CAR on non-list");
-
+	if (v->type != VAL_CONS) die("car on non-cons");
 	return v->v.cons.car;
 }
 
 Value*
 cdr(Value* v)
 {
-	if (v->type != VAL_CONS)
-		die("CDR on non-list");
-
+	if (v->type != VAL_CONS) die("cdr on non-cons");
 	return v->v.cons.cdr;
 }
 

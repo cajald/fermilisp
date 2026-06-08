@@ -7,9 +7,12 @@
 #ifndef EVAL_H
 #define EVAL_H
 
-#include "cons.h"
+#include <stddef.h>
 
-typedef Value* (*BuiltinCallback)(Value*);
+#include "cons.h"
+#include "env.h"
+
+typedef Value* (*BuiltinCallback)(Env*, Value*);
 
 struct builtin
 {
@@ -21,19 +24,18 @@ struct builtin
 extern const struct builtin builtins[];
 extern const size_t builtins_count;
 
-/* builtins */
-Value* bi_plus(Value*);
-Value* bi_minus(Value*);
-Value* bi_mul(Value*);
-Value* bi_div(Value*);
-Value* bi_mod(Value*);
-Value* bi_car(Value*);
-Value* bi_cdr(Value*);
-Value* bi_lambda(Value*);
-Value* bi_quote(Value*);
-Value* bi_defun(Value*);
+Value* bi_plus(Env*, Value*);
+Value* bi_minus(Env*, Value*);
+Value* bi_mul(Env*, Value*);
+Value* bi_div(Env*, Value*);
+Value* bi_mod(Env*, Value*);
+Value* bi_car(Env*, Value*);
+Value* bi_cdr(Env*, Value*);
+Value* bi_lambda(Env*, Value*);
+Value* bi_quote(Env*, Value*);
+Value* bi_defun(Env*, Value*);
 
-Value* eval(Value*);
+Value* eval(Env* env, Value* sexp);
 
 #endif
 

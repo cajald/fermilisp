@@ -1,19 +1,57 @@
 /*
  * eval.c -- evaluation
- *
- * Evaluates S-exps
  */
 
-#include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "eval.h"
-#include "util.h"
 #include "cons.h"
+#include "util.h"
+#include "env.h"
+
+static Value* evallist(Env* env, Value* list);
+
+static int
+compare(const void* a, const void* b)
+{
+	const struct builtin* ba = a;
+	const struct builtin* bb = b;
+
+	return strcmp(ba->sym->v.sym, bb->sym->v.sym);
+}
 
 static Value*
-evallist(Value* list)
+lambd_apply(Env* env, Value* fn, Value* args)
+{
+	Value* params = fn->v.lambda.params;
+	Value* body   = fn->v.lambda.body;
+	Env* closure   = fn->v.lambda.closure;
+
+	Value* evaled_args = evallist(env, args);
+	Env* call_env = mkenv(closure);
+
+	while (!isnil(params)) {
+		if (isnil(evaled_args))
+			die("too few arguments");
+
+		defenv(call_env,
+				car(params)->v.sym,
+				car(evaled_args));
+
+		params = cdr(params);
+		evaled_args = cdr(evaled_args);
+	}
+
+	if (!isnil(evaled_args))
+		die("too many arguments");
+
+	return eval(call_env, body);
+}
+
+	static Value*
+evallist(Env* env, Value* list)
 {
 	if (isnil(list))
 		return mknil();
@@ -21,19 +59,13 @@ evallist(Value* list)
 	Value* head = NULL;
 	Value* tail = NULL;
 
-	while (!isnil(list))
-	{
-		Value* ev = eval(car(list));
-
+	while (!isnil(list)) {
+		Value* ev = eval(env, car(list));
 		Value* node = cons(ev, mknil());
 
 		if (!head)
-		{
-			head = node;
-			tail = node;
-		}
-		else
-		{
+			head = tail = node;
+		else {
 			tail->v.cons.cdr = node;
 			tail = node;
 		}
@@ -44,59 +76,67 @@ evallist(Value* list)
 	return head;
 }
 
-static int
-compare(const void* a, const void* b)
-{
-	const struct builtin* ba = (const struct builtin*)a;
-	const struct builtin* bb = (const struct builtin*)b;
-
-	return strcmp(ba->sym->v.sym, bb->sym->v.sym);
-}
-
 Value*
-eval(Value* sexp)
+eval(Env* env, Value* sexp)
 {
-	Value* c;
-	Value* args;
-	Value* evaluated_args;
-	Value tmp;
-	struct builtin key;
-	struct builtin* found;
-
-	if (sexp->type == VAL_NUM || sexp->type == VAL_NIL)
-		return sexp;
-	
-	/* TODO: When variables are implemented, remove this! */
-	if (sexp->type == VAL_SYM)
+	if (sexp->type == VAL_NUM)
 		return sexp;
 
-	c = car(sexp);
-	args = cdr(sexp);
+	if (sexp->type == VAL_SYM) {
+		/* first try env */
+		Value* v = env_lookup(env, sexp->v.sym);
 
-	if (c->type != VAL_SYM)
-		die("invalid function call");
+		if (v)
+			return v;
 
-	tmp.type = VAL_SYM;
-	tmp.v.sym = c->v.sym;
+		struct builtin key;
+		key.sym = sexp;
 
-	key.sym = &tmp;
-	key.cb = NULL;
+		/* if not, try builtins */
+		struct builtin* found = bsearch(
+				&key,
+				builtins,
+				builtins_count,
+				sizeof(struct builtin),
+				compare
+				);
 
-	found = bsearch(
-			&key,
-			builtins,
-			builtins_count,
-			sizeof(struct builtin),
-			compare);
+		if (found)
+			return found->sym;  /* return canonical symbol */
 
-	if (!found)
-		die("unknown function");
+		die("undefined symbol");
+	}
 
-	if (!found->special)
-		evaluated_args = evallist(args);
-	else
-		evaluated_args = args;
+	Value* op_node = car(sexp);
+	Value* args    = cdr(sexp);
 
-	return found->cb(evaluated_args);
+	Value* op = eval(env, op_node);
+
+	if (op->type == VAL_LAMBDA)
+		return lambd_apply(env, op, args);
+
+	if (op->type == VAL_SYM) {
+		struct builtin key;
+		key.sym = op;
+
+		struct builtin* found = bsearch(
+				&key,
+				builtins,
+				builtins_count,
+				sizeof(struct builtin),
+				compare
+				);
+
+		if (!found)
+			die("unknown function");
+
+		Value* evaluated_args =
+			found->special ? args : evallist(env, args);
+
+		return found->cb(env, evaluated_args);
+	}
+
+	die("not callable");
+	return NULL;
 }
 

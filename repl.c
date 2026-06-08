@@ -94,7 +94,7 @@ readexprline(void)
 }
 
 void
-repl(void)
+repl(Env* glob)
 {
 	printf("fermiLisp REPL\n");
 
@@ -117,7 +117,7 @@ repl(void)
 		Value *expr = readexpr(&lex);
 
 		if (expr != NULL) {
-			Value *result = eval(expr);
+			Value *result = eval(glob, expr);
 
 			print(result);
 			putchar('\n');

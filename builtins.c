@@ -2,88 +2,58 @@
  * builtins.c -- builtins
  */
 
-#include <stdlib.h>
-#include <string.h>
-
-#include "util.h"
 #include "eval.h"
 #include "cons.h"
+#include "util.h"
 
-/*
- * Builtins must be sorted lexicographically by symbol
- *
- * because we used bsearch() i guess
- */
 const struct builtin builtins[] =
 {
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "*" },      .cb = bi_mul, 0 },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "+" },      .cb = bi_plus, 0 },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "-" },      .cb = bi_minus, 0 },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "/" },      .cb = bi_div, 0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "*" },    bi_mul,    0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "+" },    bi_plus,   0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "-" },    bi_minus,  0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "/" },    bi_div,    0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "%" },    bi_mod,    0 },
 
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "car" },    .cb = bi_car, 0 },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "cdr" },    .cb = bi_cdr, 0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "car" },  bi_car,    0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "cdr" },  bi_cdr,    0 },
 
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "defun" },  .cb = bi_defun, 1 },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "eval" },   .cb = eval, 1 },
-
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, .cb = bi_lambda, 1 },
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "mod" },    .cb = bi_mod, 0 },
-
-	{ .sym = &(Value){ .type = VAL_SYM, .v.sym = "quote" },  .cb = bi_quote, 1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "defun" }, bi_defun,  1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, bi_lambda, 1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "quote" }, bi_quote,  1 },
 };
 
 const size_t builtins_count = ARRSIZE(builtins);
 
-/*****************************************************************************/
-
-static Value*
-expectnum(Value* v)
+static Value* expectnum(Value* v)
 {
 	if (v->type != VAL_NUM)
 		die("expected number");
 	return v;
 }
 
-/*
-static Value*
-expectcons(Value* v)
-{
-	if (v->type != VAL_CONS)
-		die("expected cons");
-	return v;
-}
-*/
-
 Value*
-bi_plus(Value* args)
+bi_plus(Env* env, Value* args)
 {
 	double sum = 0;
 
-	while (!isnil(args))
-	{
+	while (!isnil(args)) {
 		sum += expectnum(car(args))->v.num;
 		args = cdr(args);
 	}
-	
+
 	return mknum(sum);
 }
 
 Value*
-bi_minus(Value* args)
+bi_minus(Env* env, Value* args)
 {
-	if (isnil(args))
-		die("expected at least 1 arg for -");
-
 	double x = expectnum(car(args))->v.num;
 	args = cdr(args);
 
-	/* negate */
 	if (isnil(args))
 		return mknum(-x);
 
-	while (!isnil(args))
-	{
+	while (!isnil(args)) {
 		x -= expectnum(car(args))->v.num;
 		args = cdr(args);
 	}
@@ -92,25 +62,21 @@ bi_minus(Value* args)
 }
 
 Value*
-bi_mul(Value* args)
+bi_mul(Env* env, Value* args)
 {
-	double res = 1;
+	double r = 1;
 
-	while (!isnil(args))
-	{
-		res *= expectnum(car(args))->v.num;
+	while (!isnil(args)) {
+		r *= expectnum(car(args))->v.num;
 		args = cdr(args);
 	}
 
-	return mknum(res);
+	return mknum(r);
 }
 
 Value*
-bi_div(Value* args)
+bi_div(Env* env, Value* args)
 {
-	if (isnil(args))
-		die("expected at least 1 arg for /");
-
 	double x = expectnum(car(args))->v.num;
 	args = cdr(args);
 
@@ -125,52 +91,48 @@ bi_div(Value* args)
 	return mknum(x);
 }
 
-Value* bi_mod(Value* args)
+Value*
+bi_mod(Env* env, Value* args)
 {
-	Value* a = expectnum(car(args));
-	Value* b = expectnum(car(cdr(args)));
+	long a = (long)expectnum(car(args))->v.num;
+	long b = (long)expectnum(car(cdr(args)))->v.num;
 
-	long x = (long)a->v.num;
-	long y = (long)b->v.num;
+	if (b == 0) die("mod by zero");
 
-	if (y == 0)
-		die("mod by zero");
-
-	return mknum(x % y);
+	return mknum(a % b);
 }
 
-/*****************************************************************************/
-
 Value*
-bi_car(Value* args)
+bi_car(Env* env, Value* args)
 {
 	return car(car(args));
 }
 
 Value*
-bi_cdr(Value* args)
+bi_cdr(Env* env, Value* args)
 {
 	return cdr(car(args));
 }
 
-/*****************************************************************************/
-
 Value*
-bi_quote(Value* args)
+bi_quote(Env* env, Value* args)
 {
 	return car(args);
 }
 
 Value*
-bi_lambda(Value* args)
+bi_lambda(Env* env, Value* args)
 {
-	die("lambda is todo :(");
-	return mknil();
+	Value* params = car(args);
+	Value* body   = car(cdr(args));
+
+	return mklambda(params, body, env);
 }
 
-Value* bi_defun(Value* args)
+Value*
+bi_defun(Env* env, Value* args)
 {
-	die("defun is todo :(");
+	die("defun not implemented");
 	return mknil();
 }
 

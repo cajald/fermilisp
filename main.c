@@ -9,6 +9,7 @@
 
 #include "arg.h"
 #include "eval.h"
+#include "env.h"
 #include "lexer.h"
 #include "parser.h"
 #include "repl.h"
@@ -18,6 +19,7 @@ char* argv0;
 
 int   strict = 0;
 char* script = "";
+Env*  global = NULL;
 
 static char*
 readfile(const char* path)
@@ -66,8 +68,10 @@ main(int argc, char** argv)
 			return EXIT_FAILURE;
 	} ARGEND
 
+	global = mkenv(NULL);
+
 	if (argc == 0)
-		repl();
+		repl(global);
 
 	script = readfile(argv[0]);
 
@@ -82,7 +86,7 @@ main(int argc, char** argv)
 		if (expr == NULL || expr->type == VAL_NIL)
 			break;
 
-		Value* result = eval(expr);
+		Value* result = eval(global, expr);
 
 		print(result);
 		printf("\n");

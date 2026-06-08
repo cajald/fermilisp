@@ -108,6 +108,8 @@ print(Value* v)
 		case VAL_CONS:
 			printlist(v);
 			break;
+		case VAL_LAMBDA:
+			printf("#<lambda at 0x%p>", (void*)v);
 		case VAL_NIL:
 			printf("()");
 			break;

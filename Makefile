@@ -2,7 +2,7 @@
 # Makefile -- build system
 #
 
-CFILES= main.c util.c cons.c lexer.c parser.c eval.c builtins.c repl.c
+CFILES= main.c util.c cons.c lexer.c parser.c eval.c builtins.c repl.c env.c
 OFILES= ${CFILES:.c=.o}
 DFILES= ${CFILES:.c=.d}
 
@@ -31,8 +31,7 @@ clean:
 	rm -rf ${DFILES} ${OFILES} ${TARG}
 
 install: all
-	install -D ${PREFIX}${BINDIR}
-	install -sm 755 ${TARG} ${PREFIX}${BINDIR}${BINNAME}
+	install -Dsm 755 ${TARG} ${PREFIX}${BINDIR}${BINNAME}
 
 uninstall:
 	rm -f ${PREFIX}${BINDIR}${BINNAME}

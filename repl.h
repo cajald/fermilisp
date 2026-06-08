@@ -5,7 +5,9 @@
 #ifndef REPL_H
 #define REPL_H
 
-void repl(void);
+#include "env.h"
+
+void repl(Env* env);
 
 #endif /* REPL_H */
 
