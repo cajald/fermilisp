@@ -2,9 +2,12 @@
  * builtins.c -- builtins
  */
 
+#include <stdio.h>
+
 #include "eval.h"
 #include "cons.h"
 #include "util.h"
+#include "parser.h"
 
 const struct builtin builtins[] =
 {

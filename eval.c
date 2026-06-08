@@ -36,8 +36,13 @@ lambd_apply(Env* env, Value* fn, Value* args)
 		if (isnil(evaled_args))
 			die("too few arguments");
 
+		Value *param = car(params);
+
+		if (param->type != VAL_SYM)
+			die("lambda parameter shall be a symbol");
+
 		defenv(call_env,
-				car(params)->v.sym,
+				param->v.sym,
 				car(evaled_args));
 
 		params = cdr(params);
@@ -79,10 +84,12 @@ evallist(Env* env, Value* list)
 Value*
 eval(Env* env, Value* sexp)
 {
-	if (sexp->type == VAL_NUM)
+	switch (sexp->type) {
+	case VAL_NUM:
+	case VAL_NIL:
+	case VAL_LAMBDA:
 		return sexp;
-
-	if (sexp->type == VAL_SYM) {
+	case VAL_SYM: {
 		/* first try env */
 		Value* v = env_lookup(env, sexp->v.sym);
 
@@ -94,49 +101,53 @@ eval(Env* env, Value* sexp)
 
 		/* if not, try builtins */
 		struct builtin* found = bsearch(
-				&key,
-				builtins,
-				builtins_count,
-				sizeof(struct builtin),
-				compare
-				);
+			&key,
+			builtins,
+			builtins_count,
+			sizeof(struct builtin),
+			compare
+		);
 
 		if (found)
 			return found->sym;  /* return canonical symbol */
 
 		die("undefined symbol");
+      }
+	case VAL_CONS: {
+		      Value* op_node = car(sexp);
+		      Value* args    = cdr(sexp);
+
+		      Value* op = eval(env, op_node);
+
+		      if (op->type == VAL_LAMBDA)
+			      return lambd_apply(env, op, args);
+
+		      if (op->type == VAL_SYM) {
+			      struct builtin key;
+			      key.sym = op;
+
+			      struct builtin* found = bsearch(
+					      &key,
+					      builtins,
+					      builtins_count,
+					      sizeof(struct builtin),
+					      compare
+					      );
+
+			      if (!found)
+				      die("unknown function");
+
+			      Value* evaluated_args =
+				      found->special ? args : evallist(env, args);
+
+			      return found->cb(env, evaluated_args);
+		      }
+
+		      die("not callable");
+		      return NULL;
+	}
 	}
 
-	Value* op_node = car(sexp);
-	Value* args    = cdr(sexp);
-
-	Value* op = eval(env, op_node);
-
-	if (op->type == VAL_LAMBDA)
-		return lambd_apply(env, op, args);
-
-	if (op->type == VAL_SYM) {
-		struct builtin key;
-		key.sym = op;
-
-		struct builtin* found = bsearch(
-				&key,
-				builtins,
-				builtins_count,
-				sizeof(struct builtin),
-				compare
-				);
-
-		if (!found)
-			die("unknown function");
-
-		Value* evaluated_args =
-			found->special ? args : evallist(env, args);
-
-		return found->cb(env, evaluated_args);
-	}
-
-	die("not callable");
-	return NULL;
+	__builtin_unreachable();
 }
 
