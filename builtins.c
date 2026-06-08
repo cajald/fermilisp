@@ -20,9 +20,9 @@ const struct builtin builtins[] =
 	{ &(Value){ .type = VAL_SYM, .v.sym = "car" },  bi_car,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "cdr" },  bi_cdr,    0 },
 
-	{ &(Value){ .type = VAL_SYM, .v.sym = "defun" }, bi_defun,  1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "define" }, bi_define, 1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, bi_lambda, 1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "quote" }, bi_quote,  1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "quote" },  bi_quote,  1 },
 };
 
 const size_t builtins_count = ARRSIZE(builtins);
@@ -133,9 +133,32 @@ bi_lambda(Env* env, Value* args)
 }
 
 Value*
-bi_defun(Env* env, Value* args)
+bi_define(Env* env, Value* args)
 {
-	die("defun not implemented");
+	Value* targ = car(args);
+	Value* rest = cdr(args);
+
+	/* Variables: (define x 1254) */
+	if (targ->type == VAL_SYM) {
+		Value* val = eval(env, car(rest));
+		defenv(env, targ->v.sym, val);
+		return val;
+	}
+
+	/* Functions: (define (f x y) body) */
+	if (targ->type == VAL_CONS) {
+		Value* funname = car(targ);
+		Value* params = cdr(targ);
+		Value* body = car(rest);
+
+		/* this is shorthand for: (define funname (lambda (params) body) */
+		Value* lambd = mklambda(params, body, env);
+
+		defenv(env, funname->v.sym, lambd);
+		return lambd;
+	}
+
+	die("malformed define");
 	return mknil();
 }
 

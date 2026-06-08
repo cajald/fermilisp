@@ -33,7 +33,7 @@ Value* bi_car(Env*, Value*);
 Value* bi_cdr(Env*, Value*);
 Value* bi_lambda(Env*, Value*);
 Value* bi_quote(Env*, Value*);
-Value* bi_defun(Env*, Value*);
+Value* bi_define(Env*, Value*);
 
 Value* eval(Env* env, Value* sexp);
 
