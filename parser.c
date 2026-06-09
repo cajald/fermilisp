@@ -111,6 +111,9 @@ print(Value* v)
 		case VAL_LAMBDA:
 			printf("#<lambda at 0x%p>", (void*)v);
 			break;
+		case VAL_BOOL:
+			printf("%s", v->v.num ? "#t" : "#f");
+			break;
 		case VAL_NIL:
 			printf("()");
 			break;

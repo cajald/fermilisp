@@ -27,6 +27,7 @@ enum valtype
 	VAL_SYM,
 	VAL_NUM,
 	VAL_LAMBDA,
+	VAL_BOOL,
 };
 
 typedef enum valtype ValType;
@@ -56,6 +57,7 @@ struct val
 };
 
 /* constructors */
+Value* mkbool(int b);
 Value* mknil(void);
 Value* mknum(double d);
 Value* mksym(const char* s);

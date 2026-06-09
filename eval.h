@@ -35,6 +35,7 @@ Value* bi_lambda(Env*, Value*);
 Value* bi_quote(Env*, Value*);
 Value* bi_define(Env*, Value*);
 Value* bi_set(Env*, Value*);
+Value* bi_if(Env*, Value*);
 
 Value* eval(Env* env, Value* sexp);
 

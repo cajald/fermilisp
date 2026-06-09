@@ -118,7 +118,9 @@ eval(Env* env, Value* sexp)
 			return found->sym;  /* return canonical symbol */
 
 		die("undefined symbol");
-      }
+	}
+	case VAL_BOOL:
+		return sexp;
 	case VAL_CONS: {
 		      Value* op_node = car(sexp);
 		      Value* args    = cdr(sexp);

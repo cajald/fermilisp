@@ -70,6 +70,11 @@ main(int argc, char** argv)
 
 	global = mkenv(NULL);
 
+	/* make #t, nil and #f */
+	defenv(global, "#t", mkbool(1));
+	defenv(global, "#f", mkbool(0));
+	defenv(global, "nil", mknil());
+
 	if (argc == 0)
 		repl(global);
 

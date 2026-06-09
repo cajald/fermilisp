@@ -53,6 +53,15 @@ mklambda(Value* params, Value* body, Env* closure)
 }
 
 Value*
+mkbool(int b)
+{
+	Value* v = emalloc(sizeof(*v));
+	v->type = VAL_BOOL;
+	v->v.num = b ? 1 : 0;
+	return v;
+}
+
+Value*
 cons(Value* carv, Value* cdrv)
 {
 	Value* v = emalloc(sizeof(*v));

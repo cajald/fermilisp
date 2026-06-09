@@ -21,6 +21,7 @@ const struct builtin builtins[] =
 	{ &(Value){ .type = VAL_SYM, .v.sym = "cdr" },  bi_cdr,    0 },
 
 	{ &(Value){ .type = VAL_SYM, .v.sym = "define" }, bi_define, 1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "if" },     bi_if,     1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, bi_lambda, 1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "quote" },  bi_quote,  1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "set!" },   bi_set,    1 },
@@ -178,5 +179,35 @@ bi_set(Env* env, Value* args)
 		die("can't set!: unbound variable");
 
 	return val;
+}
+
+static int
+truth(Value* v)
+{
+	return !(v->type == VAL_BOOL && v->v.num == 0);
+}
+
+Value*
+bi_if(Env* env, Value* args)
+{
+	if (isnil(args)) die("if: missing test");
+
+	Value* test = car(args);
+
+	Value* rest = cdr(args);
+	if (isnil(rest)) die("if: missing then branch");
+
+	Value* thenp = car(rest);
+
+	Value* elsep = mknil();
+	if (!isnil(cdr(rest)))
+		elsep = car(cdr(rest));
+
+	Value* cond = eval(env, test);
+
+	if (!truth(cond))
+		return eval(env, elsep);
+
+	return eval(env, thenp);
 }
 
