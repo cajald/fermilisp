@@ -21,6 +21,8 @@ int   strict = 0;
 char* script = "";
 Env*  global = NULL;
 
+extern void feval(Env* env, const char* path);
+
 static char*
 readfile(const char* path)
 {
@@ -74,6 +76,7 @@ main(int argc, char** argv)
 	defenv(global, "#t", mkbool(1));
 	defenv(global, "#f", mkbool(0));
 	defenv(global, "nil", mknil());
+	feval(global, "prelude.scm");
 
 	if (argc == 0)
 		repl(global);

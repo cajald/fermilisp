@@ -59,7 +59,7 @@ truth(Value* v)
 	return !(v->type == VAL_BOOL && v->v.num == 0);
 }
 
-static void
+void
 feval(Env* env, const char* path)
 {
 	FILE* f = fopen(path, "r");
