@@ -46,6 +46,7 @@ Value* bi_booleanp(Env*, Value*);
 Value* bi_and(Env*, Value*);
 Value* bi_or(Env*, Value*);
 Value* bi_not(Env*, Value*);
+Value* bi_require(Env*, Value*);
 
 Value* eval(Env* env, Value* sexp);
 

@@ -12,33 +12,30 @@
 
 const struct builtin builtins[] =
 {
-	/* arithmetic */
 	{ &(Value){ .type = VAL_SYM, .v.sym = "%" },    bi_mod,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "*" },    bi_mul,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "+" },    bi_plus,   0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "-" },    bi_minus,  0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "/" },    bi_div,    0 },
 
-	/* comparisons */
 	{ &(Value){ .type = VAL_SYM, .v.sym = "<" },    bi_lt,     0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "=" },    bi_eq,     0 },
 
-	/* list ops */
-	{ &(Value){ .type = VAL_SYM, .v.sym = "car" },  bi_car,    0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "cdr" },  bi_cdr,    0 },
-
-	/* core forms */
 	{ &(Value){ .type = VAL_SYM, .v.sym = "and" },    bi_and,    1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "boolean?" }, bi_booleanp, 0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "car" },  bi_car,    0 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "cdr" },  bi_cdr,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "define" }, bi_define, 1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "if" },     bi_if,     1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, bi_lambda, 1 },
+
+	{ &(Value){ .type = VAL_SYM, .v.sym = "not" },    bi_not,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "null?" },  bi_nullp,  0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "number?" },bi_numberp,0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "not" },    bi_not,    0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "or" },     bi_or,     1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "pair?" },  bi_pairp,  0 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "quote" },  bi_quote,  1 },
+	{ &(Value){ .type = VAL_SYM, .v.sym = "require" }, bi_require, 1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "set!" },   bi_set,    1 },
 	{ &(Value){ .type = VAL_SYM, .v.sym = "symbol?" },bi_symbolp,0 },
 };
@@ -60,6 +57,35 @@ truth(Value* v)
 {
 	/* only #f is false */
 	return !(v->type == VAL_BOOL && v->v.num == 0);
+}
+
+static void
+feval(Env* env, const char* path)
+{
+	FILE* f = fopen(path, "r");
+	if (!f) die("require: cannot open file");
+
+	fseek(f, 0, SEEK_END);
+	long len = ftell(f);
+	rewind(f);
+
+	char* buf = emalloc(len + 1);
+	if (fread(buf, 1, len, f) != (size_t)len)
+		die("require: read error");
+
+	buf[len] = '\0';
+	fclose(f);
+
+	Lexer lex;
+	lexinit(&lex, buf);
+
+	while (1) {
+		Value* expr = readexpr(&lex);
+		if (!expr) break;
+		eval(env, expr);
+	}
+
+	efree(buf);
 }
 
 /*****************************************************************************/
@@ -334,5 +360,17 @@ bi_if(Env* env, Value* args)
 		return eval(env, elsep);
 
 	return eval(env, thenp);
+}
+
+Value*
+bi_require(Env* env, Value* args)
+{
+	Value* v = car(args);
+
+	if (v->type != VAL_SYM)
+		die("require expects string-like symbol");
+
+	feval(env, v->v.sym);
+	return mknil();
 }
 
