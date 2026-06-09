@@ -27,7 +27,7 @@ mkbind(const char* symname, Value* val, Binding* next)
 {
 	Binding* b = emalloc(sizeof(*b));
 
-	b->symname = estrndup(symname, 512);
+	b->symname = estrndup(symname, strlen(symname));
 	b->val = val;
 	b->next = next;
 
