@@ -36,6 +36,16 @@ Value* bi_quote(Env*, Value*);
 Value* bi_define(Env*, Value*);
 Value* bi_set(Env*, Value*);
 Value* bi_if(Env*, Value*);
+Value* bi_lt(Env*, Value*);
+Value* bi_eq(Env*, Value*);
+Value* bi_nullp(Env*, Value*);
+Value* bi_symbolp(Env*, Value*);
+Value* bi_pairp(Env*, Value*);
+Value* bi_numberp(Env*, Value*);
+Value* bi_booleanp(Env*, Value*);
+Value* bi_and(Env*, Value*);
+Value* bi_or(Env*, Value*);
+Value* bi_not(Env*, Value*);
 
 Value* eval(Env* env, Value* sexp);
 
