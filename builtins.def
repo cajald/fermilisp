@@ -1,0 +1,30 @@
+/*
+ * builtins.def -- builtins
+ */
+
+X("%",        bi_mod,      0)
+X("*",        bi_mul,      0)
+X("+",        bi_plus,     0)
+X("-",        bi_minus,    0)
+X("/",        bi_div,      0)
+
+X("<",        bi_lt,       0)
+X("=",        bi_eq,       0)
+
+X("and",      bi_and,      1)
+X("begin",    bi_begin,    1)
+X("boolean?", bi_booleanp, 0)
+X("car",      bi_car,      0)
+X("cdr",      bi_cdr,      0)
+X("define",   bi_define,   1)
+X("if",       bi_if,       1)
+X("lambda",   bi_lambda,   1)
+X("not",      bi_not,      0)
+X("null?",    bi_nullp,    0)
+X("number?",  bi_numberp,  0)
+X("or",       bi_or,       1)
+X("pair?",    bi_pairp,    0)
+X("quote",    bi_quote,    1)
+X("set!",     bi_set,      1)
+X("symbol?",  bi_symbolp,  0)
+

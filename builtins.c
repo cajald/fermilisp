@@ -10,34 +10,27 @@
 #include "util.h"
 #include "parser.h"
 
+#ifndef NDEBUG
+static void
+checkbuiltintbl(void)
+{
+	for (size_t i = 1; i < builtins_count; i++) {
+		if (strcmp(
+			builtins[i - 1].sym->v.sym,
+			builtins[i].sym->v.sym) > 0)
+			die("builtins.def not sorted");
+	}
+}
+#endif
+
 const struct builtin builtins[] =
 {
-	{ &(Value){ .type = VAL_SYM, .v.sym = "%" },    bi_mod,    0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "*" },    bi_mul,    0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "+" },    bi_plus,   0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "-" },    bi_minus,  0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "/" },    bi_div,    0 },
+#define X(name, fn, special) \
+	{ &(Value){ .type = VAL_SYM, .v.sym = name }, fn, special },
 
-	{ &(Value){ .type = VAL_SYM, .v.sym = "<" },    bi_lt,     0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "=" },    bi_eq,     0 },
+#include "builtins.def"
 
-	{ &(Value){ .type = VAL_SYM, .v.sym = "and" },    bi_and,    1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "boolean?" }, bi_booleanp, 0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "car" },  bi_car,    0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "cdr" },  bi_cdr,    0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "define" }, bi_define, 1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "if" },     bi_if,     1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "lambda" }, bi_lambda, 1 },
-
-	{ &(Value){ .type = VAL_SYM, .v.sym = "not" },    bi_not,    0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "null?" },  bi_nullp,  0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "number?" },bi_numberp,0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "or" },     bi_or,     1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "pair?" },  bi_pairp,  0 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "quote" },  bi_quote,  1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "require" }, bi_require, 1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "set!" },   bi_set,    1 },
-	{ &(Value){ .type = VAL_SYM, .v.sym = "symbol?" },bi_symbolp,0 },
+#undef X
 };
 
 const size_t builtins_count = ARRSIZE(builtins);
@@ -62,6 +55,10 @@ truth(Value* v)
 void
 feval(Env* env, const char* path)
 {
+#	ifndef NDEBUG
+	checkbuiltintbl();
+#	endif
+
 	FILE* f = fopen(path, "r");
 	if (!f) die("require: cannot open file");
 
@@ -372,5 +369,18 @@ bi_require(Env* env, Value* args)
 
 	feval(env, v->v.sym);
 	return mknil();
+}
+
+Value*
+bi_begin(Env* env, Value* args)
+{
+	Value* result = mknil();
+
+	while (!isnil(args)) {
+		result = eval(env, car(args));
+		args = cdr(args);
+	}
+
+	return result;
 }
 
