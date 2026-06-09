@@ -52,10 +52,16 @@ lambd_apply(Env* env, Value* fn, Value* args)
 	if (!isnil(evaled_args))
 		die("too many arguments");
 
-	return eval(call_env, body);
+	Value* res = mknil();
+
+	while (!isnil(body)) {
+		res = eval(call_env, car(body));
+		body = cdr(body);
+	}
+	return res;
 }
 
-	static Value*
+static Value*
 evallist(Env* env, Value* list)
 {
 	if (isnil(list))

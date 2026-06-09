@@ -128,7 +128,7 @@ Value*
 bi_lambda(Env* env, Value* args)
 {
 	Value* params = car(args);
-	Value* body   = car(cdr(args));
+	Value* body   = cdr(args);
 
 	return mklambda(params, body, env);
 }
@@ -150,7 +150,7 @@ bi_define(Env* env, Value* args)
 	if (targ->type == VAL_CONS) {
 		Value* funname = car(targ);
 		Value* params = cdr(targ);
-		Value* body = car(rest);
+		Value* body = rest;
 
 		/* this is shorthand for: (define funname (lambda (params) body) */
 		Value* lambd = mklambda(params, body, env);
