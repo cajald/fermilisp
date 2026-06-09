@@ -100,7 +100,7 @@ print(Value* v)
 {
 	switch (v->type) {
 		case VAL_NUM:
-			printf("%g", v->v.num);
+			printf("%f", v->v.num);
 			break;
 		case VAL_SYM:
 			printf("%s", v->v.sym);
