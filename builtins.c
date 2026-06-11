@@ -384,3 +384,36 @@ bi_begin(Env* env, Value* args)
 	return result;
 }
 
+Value*
+bi_cons(Env* env, Value* args)
+{
+	if (isnil(args))
+		die("cons got too few args");
+
+	Value* rest = car(args);
+
+	if (isnil(rest))
+		die("cons got too few args");
+
+	if (!isnil(cdr(rest)))
+		die("cons: too many arguments");
+
+	return cons(car(args), car(rest));
+}
+
+Value*
+bi_list(Env* env, Value* args)
+{
+	return args; /* and that's it */
+}
+
+Value*
+bi_apply(Env* env, Value* args)
+{
+	Value* fn = car(args);
+	Value* lst = car(cdr(args));
+	Value* expr = cons(fn, lst);
+
+	return eval(env, expr);
+}
+
