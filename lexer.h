@@ -11,6 +11,7 @@ enum ttype
 {
 	TOK_LPAREN,
 	TOK_RPAREN,
+	TOK_DOT,
 	TOK_SYM,
 	TOK_NUM,
 	TOK_EOF,

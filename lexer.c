@@ -41,6 +41,7 @@ nexttok(Lexer* l)
 
 	switch (*l->cur) {
 		case '\0':	t.type = TOK_EOF; return t;
+		case '.':	l->cur++; t.type = TOK_DOT; return t;
 		case '(':	l->cur++; t.type = TOK_LPAREN; return t;
 		case ')':	l->cur++; t.type = TOK_RPAREN; return t;
 	}

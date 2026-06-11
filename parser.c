@@ -29,40 +29,47 @@ readatom(Token t)
 static Value*
 readlist(Lexer* l)
 {
-	Token t = nexttok(l);
+	Value *head = NULL;
+	Value *tail = NULL;
 
-	if (t.type == TOK_RPAREN)
-		return mknil();
+	for (;;) {
+		Token t = nexttok(l);
 
-	Value* head = NULL;
-	Value* tail = NULL;
+		if (t.type == TOK_RPAREN)
+			return head ? head : mknil();
 
-	while (t.type != TOK_RPAREN)
-	{
+		if (t.type == TOK_DOT) {
+			if (!tail)
+				die("invalid dotted pair (no left side)");
+
+			Value* rhs = readexpr(l);
+
+			Token end = nexttok(l);
+			if (end.type != TOK_RPAREN)
+				die("expected ')' after dotted pair");
+
+			tail->v.cons.cdr = rhs;
+			return head ? head : mknil();
+		}
+
 		Value* elem;
 
 		if (t.type == TOK_LPAREN)
 			elem = readlist(l);
-		else
+		else if (t.type == TOK_NUM || t.type == TOK_SYM)
 			elem = readatom(t);
+		else
+			die("unexpected token in list");
 
 		Value* node = cons(elem, mknil());
 
 		if (!head)
-		{
-			head = node;
-			tail = node;
-		}
-		else
-		{
+			head = tail = node;
+		else {
 			tail->v.cons.cdr = node;
 			tail = node;
 		}
-
-		t = nexttok(l);
 	}
-
-	return head;
 }
 
 Value*
@@ -76,6 +83,7 @@ readexpr(Lexer* l)
 		case TOK_SYM:		return readatom(t);
 		case TOK_RPAREN:	die("unexpected )");
 		case TOK_EOF:           return NULL;
+		case TOK_DOT:           die("unexpected .");
 	}
 
 	/* At this point, the token *IS* invalid */
@@ -83,15 +91,30 @@ readexpr(Lexer* l)
 	return NULL;
 }
 
+/*****************************************************************************/
+
 void
-printlist(Value* v)
+printlist(Value *v)
 {
 	printf("(");
-	while (!isnil(v)) {
+
+	for (;;) {
 		print(car(v));
+
 		v = cdr(v);
-		if (!isnil(v)) printf(" ");
+
+		if (isnil(v))
+			break;
+
+		if (!iscons(v)) {
+			printf(" . ");
+			print(v);
+			break;
+		}
+
+		printf(" ");
 	}
+
 	printf(")");
 }
 
