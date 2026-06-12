@@ -84,6 +84,7 @@ readexpr(Lexer* l)
 		case TOK_RPAREN:	die("unexpected )");
 		case TOK_EOF:           return NULL;
 		case TOK_DOT:           die("unexpected .");
+		case TOK_QUOT:		return cons(mksym(estrndup("quote", sizeof("quote"))), cons(readexpr(l), mknil()));
 	}
 
 	/* At this point, the token *IS* invalid */

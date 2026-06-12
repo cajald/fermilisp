@@ -44,6 +44,7 @@ nexttok(Lexer* l)
 		case '.':	l->cur++; t.type = TOK_DOT; return t;
 		case '(':	l->cur++; t.type = TOK_LPAREN; return t;
 		case ')':	l->cur++; t.type = TOK_RPAREN; return t;
+		case '\'':	l->cur++; t.type = TOK_QUOT; return t;
 	}
 
 	/* number */

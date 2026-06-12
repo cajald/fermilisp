@@ -15,6 +15,7 @@ enum ttype
 	TOK_SYM,
 	TOK_NUM,
 	TOK_EOF,
+	TOK_QUOT,
 };
 
 struct tok
