@@ -417,3 +417,10 @@ bi_apply(Env* env, Value* args)
 	return eval(env, expr);
 }
 
+Value*
+bi_eval(Env* env, Value* args)
+{
+	Value* expr = car(args);
+	return eval(env, expr);
+}
+
