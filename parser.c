@@ -58,6 +58,11 @@ readlist(Lexer* l)
 			elem = readlist(l);
 		else if (t.type == TOK_NUM || t.type == TOK_SYM)
 			elem = readatom(t);
+		else if (t.type == TOK_QUOT)
+			elem = cons(
+				mksym(estrndup("quote", sizeof("quote"))),
+				cons(readexpr(l), mknil())
+			);
 		else
 			die("unexpected token in list");
 
