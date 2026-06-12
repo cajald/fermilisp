@@ -50,7 +50,7 @@ readexprline(void)
 
 	for (;;)
 	{
-		fputs(first ? "> " : "... ", stdout);
+		fputs(first ? "> " : ">> ", stdout);
 		fflush(stdout);
 
 		if (fgets(buf, sizeof(buf), stdin) == NULL)
@@ -68,6 +68,38 @@ readexprline(void)
 			 */
 			break;
 		}
+
+		buf[strcspn(buf, "\n")] = '\0';
+
+		if (strcmp(buf, ",quit") == 0)
+			exit(EXIT_SUCCESS);
+
+		if (strcmp(buf, ",l") == 0) {
+			FILE* fptr = fopen("LICENSE", "r");
+
+			if (!fptr)
+				exit(EXIT_FAILURE);
+
+			char lbuf[REPL_CHUNK];
+			while (fgets(lbuf, sizeof(lbuf), fptr) != NULL)
+				printf("%s", lbuf);
+
+			fclose(fptr);
+			continue;
+		}
+
+		if (strcmp(buf, ",w") == 0) {
+			printf("\n"
+"Affirmer offers the Work as-is and makes no representations or "
+"warranties of any kind concerning the Work, express, implied, "
+"statutory or otherwise, including without limitation warranties of "
+"title, merchantability, fitness for a particular purpose, non "
+"infringement, or the absence of latent or other defects, accuracy, or "
+"the present or absence of errors, whether or not discoverable, all to "
+"the greatest extent permissible under applicable law.\n");
+			continue;
+		}
+
 
 		size_t n = strlen(buf);
 
@@ -96,7 +128,9 @@ readexprline(void)
 void
 repl(Env* glob)
 {
-	printf("fermiLisp REPL\n");
+	puts("fermiLisp REPL\n");
+	puts("fermiLisp comes with no warranty, use ,w to see warranty "
+		"information, ,l to see the license, and ,quit to exit.");
 
 	for (;;) {
 		char *input = readexprline();
