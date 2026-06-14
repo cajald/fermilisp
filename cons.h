@@ -14,8 +14,9 @@
 
 #include <stdint.h>
 
-typedef struct cons   Cons;
+typedef struct cons    Cons;
 typedef struct lambda  Lambda;
+typedef struct lambda  Macro;
 typedef struct val     Value;
 
 struct env;
@@ -27,6 +28,7 @@ enum valtype
 	VAL_SYM,
 	VAL_NUM,
 	VAL_LAMBDA,
+	VAL_MACRO,
 	VAL_BOOL,
 };
 
@@ -53,6 +55,7 @@ struct val
 		const char* sym;
 		double  num;
 		Lambda  lambda;
+		Macro   macro;
 	} v;
 };
 
@@ -62,6 +65,7 @@ Value* mknil(void);
 Value* mknum(double d);
 Value* mksym(const char* s);
 Value* mklambda(Value* params, Value* body, struct env* closure);
+Value* mkmacro(Value* params, Value* body, struct env* closure);
 Value* cons(Value* car, Value* cdr);
 
 /* list ops */

@@ -10,6 +10,7 @@
 #include "cons.h"
 #include "util.h"
 #include "env.h"
+#include "macro.h"
 
 static Value* evallist(Env* env, Value* list);
 
@@ -93,6 +94,8 @@ eval(Env* env, Value* sexp)
 	switch (sexp->type) {
 	case VAL_NUM:
 	case VAL_NIL:
+	case VAL_BOOL:
+	case VAL_MACRO: /* This is impossible, but it makes gcc shut up */
 	case VAL_LAMBDA:
 		return sexp;
 	case VAL_SYM: {
@@ -119,11 +122,18 @@ eval(Env* env, Value* sexp)
 
 		die("undefined symbol");
 	}
-	case VAL_BOOL:
-		return sexp;
 	case VAL_CONS: {
 		      Value* op_node = car(sexp);
 		      Value* args    = cdr(sexp);
+
+		      if (op_node->type == VAL_SYM) {
+				Value* maybe_macro = env_lookup(env, op_node->v.sym);
+
+				if (maybe_macro && maybe_macro->type == VAL_MACRO) {
+					Value* exp = expand(env, sexp, maybe_macro);
+					return eval(env, exp);
+				}
+		      }
 
 		      Value* op = eval(env, op_node);
 
@@ -131,27 +141,21 @@ eval(Env* env, Value* sexp)
 			      return lambd_apply(env, op, args);
 
 		      if (op->type == VAL_SYM) {
-			      struct builtin key;
-			      key.sym = op;
+		      	struct builtin key;
+			key.sym = op;
+			struct builtin* found = bsearch(
+				&key, builtins, builtins_count,
+				sizeof(struct builtin), compare
+			);
 
-			      struct builtin* found = bsearch(
-					      &key,
-					      builtins,
-					      builtins_count,
-					      sizeof(struct builtin),
-					      compare
-					      );
+			if (!found)
+				die("unknown function");
 
-			      if (!found)
-				      die("unknown function");
-
-			      Value* evaluated_args =
-				      found->special ? args : evallist(env, args);
-
-			      return found->cb(env, evaluated_args);
+			Value* evargs = found->special ? args : evallist(env, args);
+			return found->cb(env, evargs);
 		      }
 
-		      die("not callable");
+		      die("symbol is not callable");
 		      return NULL;
 	}
 	}

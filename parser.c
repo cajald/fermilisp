@@ -138,7 +138,10 @@ print(Value* v)
 			printlist(v);
 			break;
 		case VAL_LAMBDA:
-			printf("#<lambda at 0x%p>", (void*)v);
+			printf("#<lambda at %p>", (void*)v);
+			break;
+		case VAL_MACRO:
+			printf("#<macro at %p>", (void*)v);
 			break;
 		case VAL_BOOL:
 			printf("%s", v->v.num ? "#t" : "#f");

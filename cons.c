@@ -53,6 +53,20 @@ mklambda(Value* params, Value* body, Env* closure)
 }
 
 Value*
+mkmacro(Value* params, Value* body, Env* closure)
+{
+	Value* v = emalloc(sizeof(*v));
+	v->type = VAL_MACRO;
+
+	v->v.macro.params = params;
+	v->v.macro.body = body;
+	v->v.macro.closure = closure;
+
+	return v;
+}
+
+
+Value*
 mkbool(int b)
 {
 	Value* v = emalloc(sizeof(*v));

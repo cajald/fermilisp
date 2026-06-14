@@ -2,7 +2,7 @@
 # Makefile -- build system
 #
 
-CFILES= main.c util.c cons.c lexer.c parser.c eval.c builtins.c repl.c env.c
+CFILES= main.c util.c cons.c lexer.c parser.c eval.c builtins.c repl.c env.c macro.c
 OFILES= ${CFILES:.c=.o}
 DFILES= ${CFILES:.c=.d}
 
