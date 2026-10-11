@@ -2,6 +2,7 @@
  * builtins.def -- builtins
  */
 
+/* name       function     special (recieves arguments unevaluated) */
 X("%",        bi_mod,      0)
 X("*",        bi_mul,      0)
 X("+",        bi_plus,     0)
@@ -30,6 +31,6 @@ X("number?",  bi_numberp,  0)
 X("or",       bi_or,       1)
 X("pair?",    bi_pairp,    0)
 X("quote",    bi_quote,    1)
+X("require",  bi_require,  1)
 X("set!",     bi_set,      1)
 X("symbol?",  bi_symbolp,  0)
-
