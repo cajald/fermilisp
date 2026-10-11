@@ -4,7 +4,7 @@
 [![Support Ukraine!](https://img.shields.io/badge/Support-Ukraine-005BBB?labelColor=FFD500)](https://novaukraine.org/)
 
 **fermiLisp** is a **free** public-domain Scheme interpreter made mainly for
-FermiOS, but portable to basically any operating system that can build C99.
+fun, portable to basically any operating system that can build POSIX C99.
 
 It is written in pure C99 without extensions and supports most stuff you'd expect form a basic
 Scheme system, and can be embedded on many applications.
