@@ -25,10 +25,10 @@ void*
 emalloc(size_t size)
 {
 	void* p = malloc(size);
-	memset(p, '\0', size);
-
 	if (!p)
 		die("failed malloc");
+	memset(p, '\0', size);
+
 	return p;
 }
 
