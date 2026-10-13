@@ -24,7 +24,7 @@ cc ....
 
 If everything goes OK, a `./flisp` executable will appear in the directory where
 fermiLisp was made, if you run it you will get a REPL where you can play around
-with the system. To iunstall it, run:
+with the system. To unistall it, run:
 
 ```sh
 # make install
