@@ -76,6 +76,15 @@ mkbool(int b)
 }
 
 Value*
+mkerr(const char* str)
+{
+	Value* v = emalloc(sizeof(*v));
+	v->type = VAL_ERR;
+	v->v.err = str;
+	return v;
+}
+
+Value*
 cons(Value* carv, Value* cdrv)
 {
 	Value* v = emalloc(sizeof(*v));
@@ -88,14 +97,14 @@ cons(Value* carv, Value* cdrv)
 Value*
 car(Value* v)
 {
-	if (v->type != VAL_CONS) die("car on non-cons");
+	if (v->type != VAL_CONS) return mkerr("car on non-cons");
 	return v->v.cons.car;
 }
 
 Value*
 cdr(Value* v)
 {
-	if (v->type != VAL_CONS) die("cdr on non-cons");
+	if (v->type != VAL_CONS) return mkerr("cdr on non-cons");
 	return v->v.cons.cdr;
 }
 

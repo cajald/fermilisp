@@ -35,12 +35,12 @@ lambd_apply(Env* env, Value* fn, Value* args)
 
 	while (!isnil(params)) {
 		if (isnil(evaled_args))
-			die("too few arguments");
+			return mkerr("too few arguments");
 
 		Value *param = car(params);
 
 		if (param->type != VAL_SYM)
-			die("lambda parameter shall be a symbol");
+			return mkerr("lambda parameter shall be a symbol");
 
 		defenv(call_env,
 				param->v.sym,
@@ -51,7 +51,7 @@ lambd_apply(Env* env, Value* fn, Value* args)
 	}
 
 	if (!isnil(evaled_args))
-		die("too many arguments");
+		return mkerr("too many arguments");
 
 	Value* res = mknil();
 
@@ -94,6 +94,7 @@ eval(Env* env, Value* sexp)
 	switch (sexp->type) {
 	case VAL_NUM:
 	case VAL_NIL:
+	case VAL_ERR:
 	case VAL_BOOL:
 	case VAL_MACRO: /* This is impossible, but it makes gcc shut up */
 	case VAL_LAMBDA:
@@ -120,7 +121,7 @@ eval(Env* env, Value* sexp)
 		if (found)
 			return found->sym;  /* return canonical symbol */
 
-		die("undefined symbol");
+		return mkerr("undefined symbol");
 	}
 	case VAL_CONS: {
 		      Value* op_node = car(sexp);
@@ -149,14 +150,13 @@ eval(Env* env, Value* sexp)
 			);
 
 			if (!found)
-				die("unknown function");
+				return mkerr("unknown function");
 
 			Value* evargs = found->special ? args : evallist(env, args);
 			return found->cb(env, evargs);
 		      }
 
-		      die("symbol is not callable");
-		      return NULL;
+		      return mkerr("symbol is not callable");
 	}
 	}
 

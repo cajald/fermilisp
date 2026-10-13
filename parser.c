@@ -21,7 +21,7 @@ readatom(Token t)
 		return mksym(estrndup(t.start, t.len));
 
 	/* At this point, it is for sure that the atom is malformed */
-	die("bad atom");
+	return mkerr("bad atom");
 	return NULL; /* unreachable */
 }
 /*****************************************************************************/
@@ -40,13 +40,13 @@ readlist(Lexer* l)
 
 		if (t.type == TOK_DOT) {
 			if (!tail)
-				die("invalid dotted pair (no left side)");
+				return mkerr("invalid dotted pair (no left side)");
 
 			Value* rhs = readexpr(l);
 
 			Token end = nexttok(l);
 			if (end.type != TOK_RPAREN)
-				die("expected ')' after dotted pair");
+				return mkerr("expected ')' after dotted pair");
 
 			tail->v.cons.cdr = rhs;
 			return head ? head : mknil();
@@ -64,7 +64,7 @@ readlist(Lexer* l)
 				cons(readexpr(l), mknil())
 			);
 		else
-			die("unexpected token in list");
+			return mkerr("unexpected token in list");
 
 		Value* node = cons(elem, mknil());
 
@@ -86,15 +86,14 @@ readexpr(Lexer* l)
 		case TOK_LPAREN:	return readlist(l);
 		case TOK_NUM:
 		case TOK_SYM:		return readatom(t);
-		case TOK_RPAREN:	die("unexpected )");
+		case TOK_RPAREN:	return mkerr("unexpected )");
 		case TOK_EOF:           return NULL;
-		case TOK_DOT:           die("unexpected .");
+		case TOK_DOT:       return mkerr("unexpected .");
 		case TOK_QUOT:		return cons(mksym(estrndup("quote", sizeof("quote"))), cons(readexpr(l), mknil()));
 	}
 
 	/* At this point, the token *IS* invalid */
-	die("unknown token");
-	return NULL;
+	return mkerr("unknown token");
 }
 
 /*****************************************************************************/
@@ -142,6 +141,10 @@ print(Value* v)
 			break;
 		case VAL_MACRO:
 			printf("#<macro at %p>", (void*)v);
+			break;
+		case VAL_ERR:
+			puts("** error produced **");
+			puts(v->v.err);
 			break;
 		case VAL_BOOL:
 			printf("%s", v->v.num ? "#t" : "#f");

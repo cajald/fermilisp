@@ -17,6 +17,8 @@ void* ecalloc(size_t nmemb, size_t size);
 void* erealloc(void* ptr, size_t newsize);
 char* estrndup(const char* s, int len);
 void  efree(void* ptr);
+void  assert(_Bool cond, char* msg);
+char* vargs(const char* fmt, ...);
 
 #define ASSERT(x)	do { if (!(x)) { \
 				fprintf(stderr, "%s: failed assertion at %s:%d\n", \

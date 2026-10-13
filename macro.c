@@ -32,11 +32,11 @@ expand(Env* env, Value* sexp, Value* macro)
 	Env* callenv = mkenv(clos);
 	while (!isnil(params)) {
 		if (isnil(args))
-			die("too few arguments to macro");
+			return mkerr("too few arguments to macro");
 
 		Value* param = car(params);
 		if (param->type != VAL_SYM)
-			die("macro param must be a symbol");
+			return mkerr("macro param must be a symbol");
 
 		defenv(callenv,
 			param->v.sym,
@@ -47,7 +47,7 @@ expand(Env* env, Value* sexp, Value* macro)
 	}
 
 	if (!isnil(args))
-		die("too many args to macro");
+		return mkerr("too many args to macro");
 
 	Value* exp = mknil();
 

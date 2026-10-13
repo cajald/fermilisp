@@ -38,7 +38,7 @@ pardepth(const char *s)
 	return depth;
 }
 
-static char *
+static char*
 readexprline(void)
 {
 	char buf[REPL_CHUNK];

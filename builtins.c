@@ -14,12 +14,12 @@
 static void
 checkbuiltintbl(void)
 {
-	for (size_t i = 1; i < builtins_count; i++) {
-		if (strcmp(
-			builtins[i - 1].sym->v.sym,
-			builtins[i].sym->v.sym) > 0)
-			die("builtins.def not sorted");
-	}
+    for (size_t i = 1; i < builtins_count; i++) {
+        assert(strcmp(
+            builtins[i - 1].sym->v.sym,
+            builtins[i].sym->v.sym) < 0,
+            "builtins.def not sorted");
+    }
 }
 #endif
 
@@ -41,15 +41,16 @@ static Value*
 expectnum(Value* v)
 {
 	if (v->type != VAL_NUM)
-		die("expected number");
+		return mkerr("expected number");
 	return v;
 }
 
 static int
 truth(Value* v)
 {
-	/* only #f is false */
-	return !(v->type == VAL_BOOL && v->v.num == 0);
+	/* only #f and nil are false */
+	return !((v->type == VAL_BOOL && v->v.num == 0)
+		|| (v->type == VAL_NIL));
 }
 
 void
@@ -60,15 +61,18 @@ feval(Env* env, const char* path)
 #	endif
 
 	FILE* f = fopen(path, "r");
-	if (!f) die("require: cannot open file");
+	if (!f) { eval(env, mkerr("require: cannot open file")); return; }
 
 	fseek(f, 0, SEEK_END);
 	long len = ftell(f);
 	rewind(f);
 
 	char* buf = emalloc(len + 1);
-	if (fread(buf, 1, len, f) != (size_t)len)
-		die("require: read error");
+	if (fread(buf, 1, len, f) != (size_t)len) {
+		/* i am the best programmer that has ever lived */
+		eval(env, mkerr("require: read error"));
+		return;
+	}
 
 	buf[len] = '\0';
 	fclose(f);
@@ -153,7 +157,7 @@ bi_mod(Env* env, Value* args)
 	long a = (long)expectnum(car(args))->v.num;
 	long b = (long)expectnum(car(cdr(args)))->v.num;
 
-	if (b == 0) die("mod by zero");
+	if (b == 0) return mkerr("mod by zero");
 
 	return mknum(a % b);
 }
@@ -299,8 +303,7 @@ bi_define(Env* env, Value* args)
 		return lambda;
 	}
 
-	die("malformed define");
-	return mknil();
+	return mkerr("malformed define");
 }
 
 Value*
@@ -325,12 +328,12 @@ bi_set(Env* env, Value* args)
 	Value* expr = car(cdr(args));
 
 	if (sym->type != VAL_SYM)
-		die("set! requires a symbol");
+		return mkerr("set! requires a symbol");
 
 	Value* val = eval(env, expr);
 
 	if (!envset(env, sym->v.sym, val))
-		die("set!: unbound variable");
+		return mkerr("set!: unbound symbol");
 
 	return val;
 }
@@ -338,12 +341,12 @@ bi_set(Env* env, Value* args)
 Value*
 bi_if(Env* env, Value* args)
 {
-	if (isnil(args)) die("if: missing test");
+	if (isnil(args)) return mkerr("if: missing test");
 
 	Value* test = car(args);
 
 	Value* rest = cdr(args);
-	if (isnil(rest)) die("if: missing then branch");
+	if (isnil(rest)) return mkerr("if: missing then branch");
 
 	Value* thenp = car(rest);
 
@@ -365,7 +368,7 @@ bi_require(Env* env, Value* args)
 	Value* v = car(args);
 
 	if (v->type != VAL_SYM)
-		die("require expects string-like symbol");
+		return mkerr("require expects string-like symbol");
 
 	feval(env, v->v.sym);
 	return mknil();
@@ -388,15 +391,15 @@ Value*
 bi_cons(Env* env, Value* args)
 {
 	if (isnil(args))
-		die("cons got too few args");
+		return mkerr("cons got too few args");
 
 	Value* rest = car(args);
 
 	if (isnil(rest))
-		die("cons got too few args");
+		return mkerr("cons got too few args");
 
 	if (!isnil(cdr(rest)))
-		die("cons: too many arguments");
+		return mkerr("cons: too many arguments");
 
 	return cons(car(args), car(rest));
 }
@@ -405,6 +408,13 @@ Value*
 bi_list(Env* env, Value* args)
 {
 	return args; /* and that's it */
+}
+
+Value*
+bi_print(Env* env, Value* args)
+{
+	print(car(args));
+	return mknil();
 }
 
 Value*
@@ -423,4 +433,3 @@ bi_eval(Env* env, Value* args)
 	Value* expr = car(args);
 	return eval(env, expr);
 }
-

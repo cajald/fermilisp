@@ -4,8 +4,10 @@
  * This only contains the CLI.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "arg.h"
 #include "eval.h"
@@ -19,27 +21,61 @@ char* argv0;
 
 int   strict = 0;
 char* script = "";
+bool  pmode;
 Env*  global = NULL;
 
 extern void feval(Env* env, const char* path);
 
-static char*
+static char *
 readfile(const char* path)
 {
 	FILE* f = fopen(path, "r");
-	if (!f) die("cannot open SCRIPT");
+    char chunk[4096];
+    char *buf = NULL;
+    size_t len = 0;
+    size_t cap = 0;
 
-	fseek(f, 0, SEEK_END);
-	long len = ftell(f);
-	rewind(f);
+    while (fgets(chunk, sizeof chunk, f) != NULL) {
+        size_t n = strlen(chunk);
 
-	char* buf = emalloc(len + 1);
-	if (fread(buf, 1, len, f) != (size_t)len)
-		die("cannot read file");
+        if (len + n + 1 > cap) {
+            size_t newcap = cap ? cap : sizeof chunk;
 
-	buf[len] = '\0';
-	fclose(f);
-	return buf;
+            while (newcap < len + n + 1) {
+                if (newcap > (size_t)-1 / 2) {
+                    free(buf);
+                    return NULL;
+                }
+                newcap *= 2;
+            }
+
+            char *tmp = realloc(buf, newcap);
+            if (tmp == NULL) {
+                free(buf);
+                return NULL;
+            }
+
+            buf = tmp;
+            cap = newcap;
+        }
+
+        memcpy(buf + len, chunk, n);
+        len += n;
+    }
+
+    if (ferror(f)) {
+        free(buf);
+        return NULL;
+    }
+
+    if (buf == NULL) {
+        buf = malloc(1);
+        if (buf == NULL)
+            return NULL;
+    }
+
+    buf[len] = '\0';
+    return buf;
 }
 
 static void
@@ -56,8 +92,8 @@ main(int argc, char** argv)
 			printf("fermiLisp version %s\n", VERSION);
 			return EXIT_SUCCESS;
 
-		case 's':
-			strict = 1;
+		case 'p':
+			pmode = 1;
 			break;
 
 		case 'h':
@@ -73,8 +109,8 @@ main(int argc, char** argv)
 	global = mkenv(NULL);
 
 	/* make #t, nil and #f */
-	defenv(global, "#t", mkbool(1));
-	defenv(global, "#f", mkbool(0));
+	defenv(global, "#t", mkbool(true));
+	defenv(global, "#f", mkbool(false));
 	defenv(global, "nil", mknil());
 	feval(global, "prelude.scm");
 
@@ -89,11 +125,6 @@ main(int argc, char** argv)
 	while (1)
 	{
 		Value* expr = readexpr(&lex);
-
-		/* EOF */
-		if (expr == NULL || expr->type == VAL_NIL)
-			break;
-
 		Value* result = eval(global, expr);
 
 		print(result);

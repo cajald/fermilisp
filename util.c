@@ -14,7 +14,8 @@
 
 extern char* argv0;
 
-void die(const char* msg)
+void
+die(const char* msg)
 {
 	fprintf(stderr, "%s: %s\n", argv0, msg ? msg : "dying");
 	abort();
@@ -30,6 +31,28 @@ emalloc(size_t size)
 	memset(p, '\0', size);
 
 	return p;
+}
+
+#define FMTBUF_SIZE 2048
+
+char*
+vargs(const char* fmt, ...)
+{
+	static char fmtbuf[FMTBUF_SIZE];
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(fmtbuf, sizeof(fmtbuf), fmt, ap);
+	va_end(ap);
+	return fmtbuf;
+}
+
+void
+assert(_Bool cond, char* msg)
+{
+	if (!cond) {
+		die(vargs("assert failed: %s", msg));
+		abort();
+	}
 }
 
 void*

@@ -7,9 +7,11 @@ OFILES= ${CFILES:.c=.o}
 DFILES= ${CFILES:.c=.d}
 
 CFLAGS:=   -Wall -Werror -pedantic -std=c99
-LDFLAGS:=  -static
+LDFLAGS:=
+#LDFLAGS+= -static
 VERSION:=  0.1.0
 CPPFLAGS:= -DIN_FERMILISP -DVERSION="\"${VERSION}\"" -MD
+#CPPFLAGS+= -DNDEBUG
 
 TARG:=    flisp
 BINNAME?= ${TARG}

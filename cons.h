@@ -30,6 +30,7 @@ enum valtype
 	VAL_LAMBDA,
 	VAL_MACRO,
 	VAL_BOOL,
+	VAL_ERR
 };
 
 typedef enum valtype ValType;
@@ -51,11 +52,12 @@ struct val
 {
 	ValType type;
 	union {
-		Cons    cons;
+		Cons        cons;
 		const char* sym;
-		double  num;
-		Lambda  lambda;
-		Macro   macro;
+		double      num;
+		const char* err;
+		Lambda      lambda;
+		Macro       macro;
 	} v;
 };
 
@@ -66,6 +68,7 @@ Value* mknum(double d);
 Value* mksym(const char* s);
 Value* mklambda(Value* params, Value* body, struct env* closure);
 Value* mkmacro(Value* params, Value* body, struct env* closure);
+Value* mkerr(const char* str);
 Value* cons(Value* car, Value* cdr);
 
 /* list ops */
