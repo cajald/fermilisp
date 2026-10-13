@@ -1,3 +1,5 @@
+<img align="right" width="100" height="100" src="https://raw.githubusercontent.com/cajald/fermilisp/refs/heads/master/media/logo-vec.svg" alt="the fermilisp logo"/>
+
 # fermiLisp
 ### _a portable lisp interpreter_
 
